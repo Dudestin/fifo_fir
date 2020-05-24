@@ -7,7 +7,7 @@ int main(){
     fout.open("params.bin", ios::out|ios::binary|ios::trunc);
 
     if (!fout) {
-        cout << "ファイル file.txt が開けません";
+        cout << "ファイル params.bin が開けません";
         return -1;
     }
 
