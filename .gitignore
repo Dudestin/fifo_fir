@@ -25,8 +25,13 @@
 *.la
 *.a
 *.lib
+*.gch
 
 # Executables
 *.exe
 *.out
 *.app
+a.out
+
+# emacs backup file
+*~

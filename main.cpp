@@ -9,60 +9,10 @@
 #include <limits>
 #include <cstdio>
 
+#include "fir_filter.hpp"
+
 #define INPUT_FIFO "/tmp/fir_fifoin"
 #define OUTPUT_FIFO "/tmp/fir_fifoout"
-
-class fir_filter{
-public:
-  int N; // dims
-  std::vector<float> Params; // params x N
-  boost::circular_buffer<float> Register; // z^-n+1
-
-  // Constructor
-  fir_filter(std::vector<float> init): Params(init) {
-    N = init.size();
-    Register.set_capacity(N-1);
-  }
-  explicit fir_filter(std::initializer_list<float> init): Params(init.begin(), init.end()) {
-    N = init.size();
-    Register.set_capacity(N-1);
-  }
-
-  float  // その時点での応答を取得し、タイムステップを進める
-  step(float input){
-    float y = Params[0] * input; // h_0 * x(n)
-    for(int n=0; n<N;++n){
-      y += Params[n+1] * Register[n]; // h_i * z^-(i-1)
-    }
-    Register.push_front(input);
-    return y;
-  }
-
-  void
-  printParameterList() const{
-    std::cout << "+++++++++++++Parameters List+++++++++++++" << std::endl;
-    for (int i = 0;i < N;++i){
-      std::cout << i << ":" << Params[i];
-      if(i%2)
-	std::cout << std::endl;
-      else
-	std::cout << "\t";
-    }
-  }
-  
-  void   // impulseもはや人智を超えた板倉
-  impulseResponse(){
-    std::cout << std::endl << "+++++++++++++Impulse Response+++++++++++++" << std::endl;
-    std::cout << "0:" << this->step(99999999.f) << std::endl;
-    for(int n = 1;n < N;++n){
-      std::cout << n << ':' << this->step(0);
-      if(n%2)
-	std::cout << std::endl;
-      else
-	std::cout << "\t";
-    }
-  }
-};
 
 int
 main(int argc,char** argv){
@@ -103,7 +53,7 @@ main(int argc,char** argv){
     exit(-1);
   }
 
-  fir_filter filter {std::vector<float>(param_tmp, param_tmp + param_N)};
+  fir_filter<float> filter {std::vector<float>(param_tmp, param_tmp + param_N)};
   delete[](param_tmp);
 
   // Await data & process them
